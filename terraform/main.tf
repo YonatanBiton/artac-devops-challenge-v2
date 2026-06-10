@@ -82,8 +82,8 @@ resource "aws_instance" "app" {
     http_endpoint               = "enabled"
     http_tokens                 = "required"
     http_put_response_hop_limit = 1
-  }  
-  
+  }
+
   tags = {
     Name    = "${var.project_name}-server"
     Project = var.project_name
@@ -91,11 +91,15 @@ resource "aws_instance" "app" {
 }
 
 resource "aws_eip" "app" {
-  instance = aws_instance.app.id
-  domain   = "vpc"
+  domain = "vpc"
 
   tags = {
     Name    = "${var.project_name}-eip"
     Project = var.project_name
   }
+}
+
+resource "aws_eip_association" "app" {
+  instance_id   = aws_instance.app.id
+  allocation_id = aws_eip.app.id
 }
