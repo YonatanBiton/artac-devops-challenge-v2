@@ -17,7 +17,11 @@ echo \
   tee /etc/apt/sources.list.d/docker.list > /dev/null
 
 apt-get update -y
-apt-get install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin
+apt-get install -y \
+  docker-ce=5:27.5.1-1~ubuntu.22.04~jammy \
+  docker-ce-cli=5:27.5.1-1~ubuntu.22.04~jammy \
+  containerd.io=1.7.25-1 \
+  docker-buildx-plugin=0.20.0-1~ubuntu.22.04~jammy
 
 systemctl enable docker
 systemctl start docker
