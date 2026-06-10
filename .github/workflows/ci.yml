@@ -61,7 +61,7 @@ jobs:
           python-version: "3.12"
 
       - name: Install dependencies
-        run: pip install -r requirements.txt
+        run: pip install -r requirements-dev.txt
 
       - name: Run tests
         run: pytest tests/ -v
@@ -120,7 +120,7 @@ jobs:
               --restart unless-stopped \
               -p 8080:8080 \
               ghcr.io/${{ env.IMAGE_NAME }}:${{ github.sha }}
-              
+
       - name: Smoke test
         run: |
           sleep 15
