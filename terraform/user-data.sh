@@ -29,6 +29,9 @@ systemctl start docker
 usermod -aG docker ubuntu #grands permissions
 
 echo "=== Pulling and running application ==="
+# Image is pulled from a public GHCR package.
+# No authentication required. If the package is made private,
+# add a docker login step here using an EC2 instance role or a stored secret.
 docker pull ${docker_image}
 docker run -d \
   --name sentiment-api \
