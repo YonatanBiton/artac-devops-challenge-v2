@@ -78,6 +78,12 @@ resource "aws_instance" "app" {
     volume_type = "gp3"
   }
 
+  metadata_options {
+    http_endpoint               = "enabled"
+    http_tokens                 = "required"
+    http_put_response_hop_limit = 1
+  }  
+  
   tags = {
     Name    = "${var.project_name}-server"
     Project = var.project_name
