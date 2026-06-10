@@ -17,3 +17,8 @@ output "ssh_command" {
   description = "SSH command to connect to the instance"
   value       = "ssh -i <your-key>.pem ubuntu@${aws_instance.app.public_ip}"
 }
+
+output "elastic_ip" {
+  description = "Static public IP of the EC2 instance"
+  value       = aws_eip.app.public_ip
+}
