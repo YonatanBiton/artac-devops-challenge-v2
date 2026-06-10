@@ -1,15 +1,15 @@
 # Sentiment Analysis API
 
 [![CI/CD Pipeline](https://github.com/YonatanBiton/artac-devops-challenge-v2/actions/workflows/ci.yml/badge.svg)](https://github.com/YonatanBiton/artac-devops-challenge-v2/actions/workflows/ci.yml)
-[![Docker Image](https://ghcr.io/yonatanbiton/artac-devops-challenge-v2)](https://github.com/YonatanBiton/artac-devops-challenge-v2/pkgs/container/artac-devops-challenge-v2)
+
 
 A FastAPI service that serves a pre-trained scikit-learn sentiment classifier. Send it a piece of text, get back a sentiment prediction and confidence score.
 
 | Endpoint | Method | Description |
 |----------|--------|-------------|
 | `/predict` | POST | Accepts `{"text": "..."}`, returns `{"sentiment": "positive/negative", "confidence": 0.92}` |
-| `/health` | GET | Liveness probe — returns 200 if the server process is running |
-| `/ready` | GET | Readiness probe — returns 200 only after the model is loaded and ready to serve |
+| `/health` | GET | Liveness probe - returns 200 if the server process is running |
+| `/ready` | GET | Readiness probe - returns 200 only after the model is loaded and ready to serve |
 
 ---
 
@@ -34,9 +34,9 @@ A FastAPI service that serves a pre-trained scikit-learn sentiment classifier. S
                                    └──────────┘  pull   └──────────────┘
 ```
 
-- **GHCR** — GitHub Container Registry stores the built Docker image
-- **EC2** — AWS EC2 instance (`t3.micro`) runs the container
-- **Elastic IP** — static public IP attached to the instance so the address never changes on restart
+- **GHCR** - GitHub Container Registry stores the built Docker image
+- **EC2** - AWS EC2 instance (`t3.micro`) runs the container
+- **Elastic IP** - static public IP attached to the instance so the address never changes on restart
 
 ---
 
@@ -176,7 +176,7 @@ terraform destroy
 - IMDSv2 is enforced on the EC2 instance to prevent credential theft via SSRF
 - EBS volume encryption is enabled at rest
 - Trivy scans block on CRITICAL/HIGH fixable vulnerabilities
-- SSH access requires key-based authentication — password authentication is disabled
+- SSH access requires key-based authentication - password authentication is disabled
 
 ---
 
