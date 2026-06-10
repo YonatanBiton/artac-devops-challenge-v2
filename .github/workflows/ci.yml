@@ -102,6 +102,17 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Deploy to EC2
-        run: |
-          echo "TODO: Implement deployment"
-          echo "This step should SSH into the EC2 instance and deploy the new container"
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ubuntu
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          script: |
+            docker pull ghcr.io/${{ github.repository }}:latest
+            docker stop sentiment-api || true
+            docker rm sentiment-api || true
+            docker run -d \
+              --name sentiment-api \
+              --restart unless-stopped \
+              -p 8080:8080 \
+              ghcr.io/${{ github.repository }}:latest
