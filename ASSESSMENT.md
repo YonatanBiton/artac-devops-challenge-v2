@@ -474,7 +474,7 @@ This completes a three-tier security posture:
 | 7 | CI/CD | Deploy job is a TODO stub | Bug |  Yes |
 | 8 | CI/CD | Uppercase image name breaks registry push | Bug |  Yes |
 | 9 | CI/CD | Missing `packages: write` permission | Bug |  Yes |
-| 10 | CI/CD | Trivy scan configured to suppress results | Intentional Trade-off | ✅ Yes |
+| 10 | CI/CD | Trivy scan configured to suppress results | Intentional Trade-off |  Yes |
 | 11 | CI/CD | Fixable vulnerabilities found by Trivy | Bug |  Yes |
 | 12 | CI/CD | `trivy-action` pinned to `@master` | Needs Improvement |  Yes |
 | 13 | Terraform | SSH open to `0.0.0.0/0` | Intentional Trade-off |  Improved |
