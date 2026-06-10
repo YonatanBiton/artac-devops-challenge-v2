@@ -42,11 +42,11 @@ resource "aws_security_group" "app" {
   }
 
   ingress {
-    description = "SSH access - restrict to known IPs only (currenly my IP)"
+    description = "SSH access - key-based authentication required"
     from_port   = 22
     to_port     = 22
     protocol    = "tcp"
-    cidr_blocks = ["79.177.137.83/32"]
+    cidr_blocks = ["0.0.0.0/0"]
   }
 
   egress {
