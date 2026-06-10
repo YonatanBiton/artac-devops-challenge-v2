@@ -1,0 +1,20 @@
+# CVE-2025-69720 - ncurses buffer overflow, no fix available in debian:13 as of 2026-06-10
+CVE-2025-69720
+
+# CVE-2026-42496 - perl path traversal, fix deferred upstream as of 2026-06-10
+CVE-2026-42496
+
+# CVE-2026-8376 - perl heap overflow, no fix available as of 2026-06-10
+CVE-2026-8376
+
+# CVE-2026-42497 - perl hardlink issue, fix deferred as of 2026-06-10
+CVE-2026-42497
+
+# CVE-2026-48959 - perl CPU exhaustion, no fix available as of 2026-06-10
+CVE-2026-48959
+
+# CVE-2026-48962 - perl arbitrary code execution, no fix available as of 2026-06-10
+CVE-2026-48962
+
+# CVE-2026-9538 - perl memory exhaustion, fix deferred as of 2026-06-10
+CVE-2026-9538
