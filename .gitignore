@@ -30,4 +30,4 @@ Thumbs.db
 terraform.tfstate
 terraform.tfstate.backup
 *.tfvars
-plan-output.txt
+
