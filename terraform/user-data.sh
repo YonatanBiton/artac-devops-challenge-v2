@@ -37,6 +37,10 @@ docker run -d \
   --name sentiment-api \
   --restart unless-stopped \
   -p ${app_port}:8080 \
+  --log-opt max-size=10m \
+  --log-opt max-file=3 \
   ${docker_image}
+
+docker image prune -f
 
 echo "=== User data script completed ==="
