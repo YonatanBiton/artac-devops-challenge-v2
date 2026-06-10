@@ -36,7 +36,7 @@ docker pull ${docker_image}
 docker run -d \
   --name sentiment-api \
   --restart unless-stopped \
-  -p ${app_port}:${app_port} \
+  -p ${app_port}:8080 \
   ${docker_image}
 
 echo "=== User data script completed ==="
