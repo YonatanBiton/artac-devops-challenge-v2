@@ -1,0 +1,10 @@
+Bug #1:
+What you found
+requirements.txt pins scikit-learn==1.6.1, but the pre-trained model in models/ was serialized with an older version of scikit-learn. In 1.6, the multi_class attribute was removed from LogisticRegression. When the app loads the pickled model and calls predict_proba(), it crashes with AttributeError: 'LogisticRegression' object has no attribute 'multi_class' — every single /predict request returns a 500.
+2. Classification: Bug
+The application is completely non-functional. This isn't a trade-off or a nice-to-have — the core endpoint is broken.
+3. Contractor's reasoning
+DECISIONS.md says: "Pinned to 1.6.1 for stability. It's a well-known release with good community support. Newer versions tend to have breaking API changes so I'm keeping this locked down."
+The reasoning is ironic — the contractor's entire justification for pinning is to avoid breaking API changes, yet they pinned to a version that introduced a breaking change relative to their own model. The instinct to pin is correct; the chosen version is wrong. They either upgraded scikit-learn without re-training/re-serializing the model, or copied a version number without verifying compatibility.
+4. What you did
+Downgraded to scikit-learn==1.5.2 — the last 1.5.x release, where multi_class is deprecated but still present, making it compatible with the pickled model. Did not upgrade to 1.6.x because we cannot modify models/ (the model would need to be re-trained to work with 1.6). Did not go below 1.5 unnecessarily.
