@@ -490,7 +490,7 @@ This completes a three-tier security posture:
 
 ## CI/CD Pipeline Design Improvements
 
-After completing the initial assessment and fixes, the following additional pipeline design issues were identified and addressed based on senior-level feedback (From Claude).
+After completing the initial assessment and fixes, the following additional pipeline design issues were identified and addressed based on senior-level feedback (from Claude).
 
 ---
 
@@ -567,3 +567,58 @@ Both `user-data.sh` and the deploy script pull from GHCR with no authentication.
 
 **What was done:**
 Added a comment in `user-data.sh` documenting the trade-off explicitly. The public package is an acceptable decision for this project, but it should be a conscious choice rather than an implicit one. If the package were made private, a `docker login` step would be required — either using an EC2 instance role or a stored secret.
+
+
+## Docker & Dependency Improvements
+
+After completing the initial assessment, the following additional Docker and dependency issues were identified and addressed based on senior-level feedback (from Claude).
+
+---
+
+### Improvement 1 — Test dependencies shipping in production image
+
+**What was found:**
+`requirements.txt` mixed runtime and test dependencies together. `pytest` and `httpx` were being installed inside the production Docker image despite never being used at runtime. Every package in the production image increases its size and attack surface — test tools have no business running in production.
+
+**What was done:**
+Split into two files:
+- `requirements.txt` — runtime only: `fastapi`, `uvicorn`, `scikit-learn`, `pydantic`
+- `requirements-dev.txt` — test dependencies: `httpx`, `pytest`, plus `-r requirements.txt` to include runtime deps
+
+Updated the `test` job in `ci.yml` to install from `requirements-dev.txt`. The production Docker image now installs only from `requirements.txt`.
+
+---
+
+### Improvement 2 — `COPY . .` pulls in unnecessary files
+
+**What was found:**
+The Dockerfile used `COPY . .` which copies everything not excluded by `.dockerignore`. While `.dockerignore` reduces the risk, it is implicit and fragile — a missing entry could silently include unwanted files. The assessment itself stated the image only needs `app/`, `models/`, and `requirements.txt`, yet the Dockerfile didn't reflect that explicitly.
+
+**What was done:**
+Replaced `COPY . .` with explicit copy commands:
+```dockerfile
+COPY requirements.txt .
+COPY app/ app/
+COPY models/ models/
+```
+This is self-documenting — anyone reading the Dockerfile immediately knows exactly what is inside the image. It is also defensive — no unexpected files can sneak in regardless of `.dockerignore` state.
+
+---
+
+### Improvement 3 — Missing ENV variables and image label
+
+**What was found:**
+The Dockerfile had no `PYTHONUNBUFFERED` or `PYTHONDONTWRITEBYTECODE` environment variables set, and no OCI standard label linking the image to its source repository.
+
+**What was done:**
+Added to the Dockerfile:
+```dockerfile
+ENV PYTHONUNBUFFERED=1 \
+    PYTHONDONTWRITEBYTECODE=1
+
+LABEL org.opencontainers.image.source=https://github.com/YonatanBiton/artac-devops-challenge-v2
+```
+
+- `PYTHONUNBUFFERED=1` — forces Python to print logs immediately rather than buffering them. Critical for debugging crashes in production containers where buffered logs might never appear.
+- `PYTHONDONTWRITEBYTECODE=1` — stops Python from writing `.pyc` cache files inside the container, which are pointless in an ephemeral environment.
+- The OCI label links the GHCR package back to the source repository automatically.
