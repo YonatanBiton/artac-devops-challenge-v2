@@ -26,7 +26,7 @@ apt-get install -y \
 systemctl enable docker
 systemctl start docker
 
-usermod -aG docker ubuntu #grands permissions
+usermod -aG docker ubuntu # grants permissions
 
 echo "=== Pulling and running application ==="
 # Image is pulled from a public GHCR package.
