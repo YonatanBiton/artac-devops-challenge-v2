@@ -120,3 +120,11 @@ jobs:
               --restart unless-stopped \
               -p 8080:8080 \
               ghcr.io/${{ env.IMAGE_NAME }}:${{ github.sha }}
+              
+      - name: Smoke test
+        run: |
+          sleep 15
+          curl --fail http://${{ secrets.EC2_HOST }}:8080/ready
+          curl --fail -X POST http://${{ secrets.EC2_HOST }}:8080/predict \
+            -H "Content-Type: application/json" \
+            -d '{"text": "smoke test"}'
