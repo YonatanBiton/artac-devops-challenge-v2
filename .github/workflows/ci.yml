@@ -77,7 +77,7 @@ jobs:
 
   deploy:
     name: Deploy
-    needs: [build]
+    needs: [build, test, security-scan]
     if: github.ref == 'refs/heads/main' && github.event_name == 'push'
     runs-on: ubuntu-latest
     steps:
