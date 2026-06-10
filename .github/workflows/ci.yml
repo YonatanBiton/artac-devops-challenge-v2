@@ -86,6 +86,14 @@ jobs:
           exit-code: 1
           ignore-unfixed: false
           severity: CRITICAL,HIGH
+          
+      - name: Trivy vulnerability report (medium/low)
+        uses: aquasecurity/trivy-action@0.28.0
+        with:
+          image-ref: ${{ env.IMAGE_NAME }}:scan
+          format: table
+          exit-code: 0
+          severity: MEDIUM,LOW
 
   deploy:
     name: Deploy
