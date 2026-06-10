@@ -1,7 +1,7 @@
 # Sentiment Analysis API
 
-![CI/CD Pipeline](https://github.com/YonatanBiton/artac-devops-challenge-v2/actions/workflows/ci.yml/badge.svg)
-![Docker Image](https://ghcr.io/yonatanbiton/artac-devops-challenge-v2)
+[![CI/CD Pipeline](https://github.com/YonatanBiton/artac-devops-challenge-v2/actions/workflows/ci.yml/badge.svg)](https://github.com/YonatanBiton/artac-devops-challenge-v2/actions/workflows/ci.yml)
+[![Docker Image](https://ghcr.io/yonatanbiton/artac-devops-challenge-v2)](https://github.com/YonatanBiton/artac-devops-challenge-v2/pkgs/container/artac-devops-challenge-v2)
 
 A FastAPI service that serves a pre-trained scikit-learn sentiment classifier. Send it a piece of text, get back a sentiment prediction and confidence score.
 
