@@ -461,6 +461,15 @@ This completes a three-tier security posture:
 
 ---
 
+### Initiative 4 — EBS volume encryption at rest
+
+**What was added:**
+Added `encrypted = true` to the `root_block_device` block in `main.tf`. This enables AES-256 encryption for all data written to the EC2 instance's disk, managed transparently by AWS KMS. The application reads and writes normally — encryption and decryption happen at the storage layer with no performance impact and no code changes required.
+
+Encrypting data at rest is a standard compliance requirement (SOC2, HIPAA, PCI-DSS) and an AWS security best practice. It protects against data exposure in hardware disposal scenarios and is free to enable.
+
+---
+
 ## Summary Table
 
 | # | Area | Finding | Classification | Fixed? |
@@ -486,7 +495,7 @@ This completes a three-tier security posture:
 | 19 | Initiative | Docker Compose for local dev | - |  Added |
 | 20 | Initiative | IMDSv2 enforcement | - |  Added |
 | 21 | Initiative | Medium/Low vulnerability logging | — | Added |
-
+| 22 | Initiative | EBS encryption at rest | — | Added |
 
 ## CI/CD Pipeline Design Improvements
 
