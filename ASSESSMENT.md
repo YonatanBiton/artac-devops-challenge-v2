@@ -292,7 +292,7 @@ Pinned to a specific verified release tag by checking `https://github.com/aquase
 The security group allowed SSH (port 22) from `0.0.0.0/0` - any IP on the internet. This exposes the instance to constant brute force attempts from automated bots that continuously scan the internet for open port 22.
 
 **Classification: Intentional Trade-off**
-The contractor knowingly left this open and documented it. The server functions, nothing is broken. But open SSH to the world is never acceptable in production regardless of time pressure.
+The contractor knowingly left this open and documented it. The server functions, nothing is broken.
 
 **Contractor's reasoning:**
 DECISIONS.md says: *"Needed for initial setup and for the CI pipeline to deploy via SSH. Haven't had time to lock it down further."*
@@ -395,7 +395,7 @@ Not mentioned in DECISIONS.md.
 **What was done:**
 Updated the output to use dynamic values:
 ```hcl
-value = "ssh -i ${var.ssh_key_name}.pem ubuntu@${aws_eip.app.public_ip}"
+value = "ssh -i sentiment-api-key.pem.pem ubuntu@${aws_eip.app.public_ip}"
 ```
 
 ---
