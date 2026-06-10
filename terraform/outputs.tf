@@ -10,12 +10,12 @@ output "instance_id" {
 
 output "app_url" {
   description = "URL to access the application"
-  value       = "http://${aws_instance.app.public_ip}:${var.app_port}"
+  value       = "http://${aws_eip.app.public_ip}:${var.app_port}"
 }
 
 output "ssh_command" {
   description = "SSH command to connect to the instance"
-  value       = "ssh -i sentiment-api-key.pem ubuntu@${aws_instance.app.public_ip}"
+  value       = "ssh -i sentiment-api-key.pem ubuntu@${aws_eip.app.public_ip}"
 }
 
 output "elastic_ip" {
