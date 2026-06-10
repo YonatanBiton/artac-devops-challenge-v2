@@ -104,3 +104,26 @@ The main time savings came from:
 - The SSH back-and-forth (restrict to IP → remove entirely → revert to open with key auth) involved three separate changes and commits due to following suboptimal AI suggestions before thinking it through independently
 
 
+## Senior Review Pass
+
+After completing the initial assessment and fixes, I used Claude as a senior DevOps reviewer by giving it access to the full repository and asking it to audit everything as if it were a senior engineer reviewing a junior's work.
+
+**Prompt:**
+> "Act as a senior DevOps engineer reviewing this repository. Go through the Dockerfile, CI/CD pipeline, Terraform configuration, and documentation and give me every finding you would raise in a real code review - things that are wrong, suboptimal, or missing. Be honest and don't hold back."
+
+**What this produced:**
+Claude returned a structured list of findings across four areas - pipeline design, Docker/dependencies, Terraform, and documentation. Many of these were issues I had not caught in my own assessment, including:
+
+- The pipeline pushing `:latest` before gates pass
+- Test dependencies shipping in the production image
+- Docker log rotation missing (disk exhaustion risk)
+- The `aws_eip` deprecation
+- The port mapping bug in `user-data.sh` (`${app_port}:${app_port}` vs `${app_port}:8080`)
+- The `.terraform.lock.hcl` being gitignored (contradicting my own criticism of `@master` pins)
+- Missing `PYTHONUNBUFFERED` and `PYTHONDONTWRITEBYTECODE` env vars
+
+**What I did:**
+Went through each finding one by one, understood what it meant and why it mattered before implementing it, and made the fixes. Not everything was implemented - Fix 4 (scanning the pushed image by digest) was understood but documented as a known limitation rather than implemented, as the complexity outweighed the benefit for this assignment scope.
+
+**Why this approach worked:**
+Using AI as a reviewer rather than just a helper produced a different quality of feedback. Instead of asking "how do I do X", asking "what's wrong with everything" surfaces blind spots that task-focused prompting misses entirely.
