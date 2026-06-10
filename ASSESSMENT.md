@@ -437,7 +437,7 @@ All AWS-managed tooling (CloudWatch, SSM agent, AWS CLI, boto3) supports IMDSv2 
 
 ---
 
-### Initiative 3 — Medium and Low vulnerability reporting
+### Initiative 3 - Medium and Low vulnerability reporting
 
 **What was added:**
 A second Trivy scan step in the `security-scan` job that runs after the main CRITICAL/HIGH scan:
@@ -452,7 +452,7 @@ A second Trivy scan step in the `security-scan` job that runs after the main CRI
     severity: MEDIUM,LOW
 ```
 
-`exit-code: 0` means this step always passes — it reports findings without blocking the pipeline. This gives the DevSecOps or DevOps team full visibility into lower severity vulnerabilities so they can be tracked and addressed over time, without creating unnecessary pipeline failures for issues that pose low immediate risk.
+`exit-code: 0` means this step always passes - it reports findings without blocking the pipeline. This gives the DevSecOps or DevOps team full visibility into lower severity vulnerabilities so they can be tracked and addressed over time, without creating unnecessary pipeline failures for issues that pose low immediate risk.
 
 This completes a three-tier security posture:
 - **CRITICAL/HIGH fixable** → block the pipeline
@@ -461,10 +461,10 @@ This completes a three-tier security posture:
 
 ---
 
-### Initiative 4 — EBS volume encryption at rest
+### Initiative 4 - EBS volume encryption at rest
 
 **What was added:**
-Added `encrypted = true` to the `root_block_device` block in `main.tf`. This enables AES-256 encryption for all data written to the EC2 instance's disk, managed transparently by AWS KMS. The application reads and writes normally — encryption and decryption happen at the storage layer with no performance impact and no code changes required.
+Added `encrypted = true` to the `root_block_device` block in `main.tf`. This enables AES-256 encryption for all data written to the EC2 instance's disk, managed transparently by AWS KMS. The application reads and writes normally - encryption and decryption happen at the storage layer with no performance impact and no code changes required.
 
 Encrypting data at rest is a standard compliance requirement (SOC2, HIPAA, PCI-DSS) and an AWS security best practice. It protects against data exposure in hardware disposal scenarios and is free to enable.
 
@@ -494,8 +494,8 @@ Encrypting data at rest is a standard compliance requirement (SOC2, HIPAA, PCI-D
 | 18 | Terraform | Hardcoded placeholder in ssh_command output | Needs Improvement |  Yes |
 | 19 | Initiative | Docker Compose for local dev | - |  Added |
 | 20 | Initiative | IMDSv2 enforcement | - |  Added |
-| 21 | Initiative | Medium/Low vulnerability logging | — | Added |
-| 22 | Initiative | EBS encryption at rest | — | Added |
+| 21 | Initiative | Medium/Low vulnerability logging | - | Added |
+| 22 | Initiative | EBS encryption at rest | - | Added |
 
 ## CI/CD Pipeline Design Improvements
 
@@ -503,10 +503,10 @@ After completing the initial assessment and fixes, the following additional pipe
 
 ---
 
-### Improvement 1 — Concurrency group missing
+### Improvement 1 - Concurrency group missing
 
 **What was found:**
-No concurrency configuration existed on the workflow. Two quick pushes to `main` could run simultaneously, deploying out of order — whichever pipeline finished last would win, potentially deploying older code over newer code.
+No concurrency configuration existed on the workflow. Two quick pushes to `main` could run simultaneously, deploying out of order - whichever pipeline finished last would win, potentially deploying older code over newer code.
 
 **What was done:**
 Added a `concurrency` block at the workflow level:
@@ -519,63 +519,63 @@ If a new push arrives while the pipeline is already running, the old run is canc
 
 ---
 
-### Improvement 2 — Test job unnecessarily blocked on build
+### Improvement 2 - Test job unnecessarily blocked on build
 
 **What was found:**
-The `test` job had `needs: [build]`, meaning it waited for the build to complete before running. However the test job never uses the built Docker image — it installs dependencies with `pip` and runs `pytest` directly on the runner. There was no reason for the dependency.
+The `test` job had `needs: [build]`, meaning it waited for the build to complete before running. However the test job never uses the built Docker image - it installs dependencies with `pip` and runs `pytest` directly on the runner. There was no reason for the dependency.
 
 **What was done:**
 Removed `needs: [build]` from the test job. It now runs in parallel with `build`, reducing overall pipeline time for free. The `deploy` job still depends on both `build` and `test`, so the safety gate is fully preserved.
 
 ---
 
-### Improvement 3 — Build pushes `:latest` before gates pass
+### Improvement 3 - Build pushes `:latest` before gates pass
 
 **What was found:**
-The build job pushed both `:latest` and `:sha` tags to GHCR immediately — before tests or security scan had run. A failing build would still overwrite `:latest` in the registry with broken code.
+The build job pushed both `:latest` and `:sha` tags to GHCR immediately - before tests or security scan had run. A failing build would still overwrite `:latest` in the registry with broken code.
 
 **What was done:**
-Changed the build job to push only the `:sha` tag. The `:latest` tag is no longer pushed by the build job directly, preventing broken images from overwriting the registry. The deploy job now uses the immutable `:sha` tag — fully traceable back to the exact commit that was tested and scanned.
+Changed the build job to push only the `:sha` tag. The `:latest` tag is no longer pushed by the build job directly, preventing broken images from overwriting the registry. The deploy job now uses the immutable `:sha` tag - fully traceable back to the exact commit that was tested and scanned.
 
 ---
 
-### Improvement 4 — Deploy used `:latest` instead of SHA
+### Improvement 4 - Deploy used `:latest` instead of SHA
 
 **What was found:**
-The deploy job pulled `:latest` from GHCR. This is not traceable — you cannot tell which commit is running on the server, and rollback requires guessing. Two fast pushes could also cause the wrong image to be deployed.
+The deploy job pulled `:latest` from GHCR. This is not traceable - you cannot tell which commit is running on the server, and rollback requires guessing. Two fast pushes could also cause the wrong image to be deployed.
 
 **What was done:**
-Changed the deploy script to pull and run `ghcr.io/${{ env.IMAGE_NAME }}:${{ github.sha }}` — the exact immutable image that passed all pipeline gates. Every deployment is now traceable to a specific commit. Rollback becomes "redeploy the previous commit's SHA tag."
+Changed the deploy script to pull and run `ghcr.io/${{ env.IMAGE_NAME }}:${{ github.sha }}` - the exact immutable image that passed all pipeline gates. Every deployment is now traceable to a specific commit. Rollback becomes "redeploy the previous commit's SHA tag."
 
 ---
 
-### Improvement 5 — No post-deploy smoke test
+### Improvement 5 - No post-deploy smoke test
 
 **What was found:**
-The pipeline marked deployment as successful the moment the SSH script finished running. The container could crash immediately after starting and the pipeline would never know — it would show green while the app was down.
+The pipeline marked deployment as successful the moment the SSH script finished running. The container could crash immediately after starting and the pipeline would never know - it would show green while the app was down.
 
 **What was done:**
 Added a smoke test step after the deploy step. The pipeline waits 15 seconds for the container to start, then curls `/ready` and `/predict` from the GitHub Actions runner (external to the instance). If either returns a non-200 response, the pipeline fails. This verifies the app is actually serving traffic after every deployment.
 
 ---
 
-### Improvement 6 — Security scan rebuilt the image instead of scanning what was pushed
+### Improvement 6 - Security scan rebuilt the image instead of scanning what was pushed
 
 **What was found:**
-The `security-scan` job ran `docker build` to create a fresh image for scanning. This image was not byte-for-byte identical to what was pushed to GHCR — dependencies could resolve differently between builds. The scan was not guaranteed to reflect what actually gets deployed.
+The `security-scan` job ran `docker build` to create a fresh image for scanning. This image was not byte-for-byte identical to what was pushed to GHCR - dependencies could resolve differently between builds. The scan was not guaranteed to reflect what actually gets deployed.
 
 **Known limitation:**
-This was identified but not fully implemented due to complexity. The correct production pattern is to pull the pushed `:sha` image by digest and scan that directly — ensuring what you scan is exactly what you ship. This is documented here as a future improvement.
+This was identified but not fully implemented due to complexity. The correct production pattern is to pull the pushed `:sha` image by digest and scan that directly - ensuring what you scan is exactly what you ship. This is documented here as a future improvement.
 
 ---
 
-### Improvement 7 — GHCR authentication implicit and undocumented
+### Improvement 7 - GHCR authentication implicit and undocumented
 
 **What was found:**
-Both `user-data.sh` and the deploy script pull from GHCR with no authentication. This works silently because the GHCR package is public — but this decision was never documented. Anyone on the internet can pull the Docker image.
+Both `user-data.sh` and the deploy script pull from GHCR with no authentication. This works silently because the GHCR package is public - but this decision was never documented. Anyone on the internet can pull the Docker image.
 
 **What was done:**
-Added a comment in `user-data.sh` documenting the trade-off explicitly. The public package is an acceptable decision for this project, but it should be a conscious choice rather than an implicit one. If the package were made private, a `docker login` step would be required — either using an EC2 instance role or a stored secret.
+Added a comment in `user-data.sh` documenting the trade-off explicitly. The public package is an acceptable decision for this project, but it should be a conscious choice rather than an implicit one. If the package were made private, a `docker login` step would be required - either using an EC2 instance role or a stored secret.
 
 
 ## Docker & Dependency Improvements
@@ -584,24 +584,24 @@ After completing the initial assessment, the following additional Docker and dep
 
 ---
 
-### Improvement 1 — Test dependencies shipping in production image
+### Improvement 1 - Test dependencies shipping in production image
 
 **What was found:**
-`requirements.txt` mixed runtime and test dependencies together. `pytest` and `httpx` were being installed inside the production Docker image despite never being used at runtime. Every package in the production image increases its size and attack surface — test tools have no business running in production.
+`requirements.txt` mixed runtime and test dependencies together. `pytest` and `httpx` were being installed inside the production Docker image despite never being used at runtime. Every package in the production image increases its size and attack surface - test tools have no business running in production.
 
 **What was done:**
 Split into two files:
-- `requirements.txt` — runtime only: `fastapi`, `uvicorn`, `scikit-learn`, `pydantic`
-- `requirements-dev.txt` — test dependencies: `httpx`, `pytest`, plus `-r requirements.txt` to include runtime deps
+- `requirements.txt` - runtime only: `fastapi`, `uvicorn`, `scikit-learn`, `pydantic`
+- `requirements-dev.txt` - test dependencies: `httpx`, `pytest`, plus `-r requirements.txt` to include runtime deps
 
 Updated the `test` job in `ci.yml` to install from `requirements-dev.txt`. The production Docker image now installs only from `requirements.txt`.
 
 ---
 
-### Improvement 2 — `COPY . .` pulls in unnecessary files
+### Improvement 2 - `COPY . .` pulls in unnecessary files
 
 **What was found:**
-The Dockerfile used `COPY . .` which copies everything not excluded by `.dockerignore`. While `.dockerignore` reduces the risk, it is implicit and fragile — a missing entry could silently include unwanted files. The assessment itself stated the image only needs `app/`, `models/`, and `requirements.txt`, yet the Dockerfile didn't reflect that explicitly.
+The Dockerfile used `COPY . .` which copies everything not excluded by `.dockerignore`. While `.dockerignore` reduces the risk, it is implicit and fragile - a missing entry could silently include unwanted files. The assessment itself stated the image only needs `app/`, `models/`, and `requirements.txt`, yet the Dockerfile didn't reflect that explicitly.
 
 **What was done:**
 Replaced `COPY . .` with explicit copy commands:
@@ -610,11 +610,11 @@ COPY requirements.txt .
 COPY app/ app/
 COPY models/ models/
 ```
-This is self-documenting — anyone reading the Dockerfile immediately knows exactly what is inside the image. It is also defensive — no unexpected files can sneak in regardless of `.dockerignore` state.
+This is self-documenting - anyone reading the Dockerfile immediately knows exactly what is inside the image. It is also defensive - no unexpected files can sneak in regardless of `.dockerignore` state.
 
 ---
 
-### Improvement 3 — Missing ENV variables and image label
+### Improvement 3 - Missing ENV variables and image label
 
 **What was found:**
 The Dockerfile had no `PYTHONUNBUFFERED` or `PYTHONDONTWRITEBYTECODE` environment variables set, and no OCI standard label linking the image to its source repository.
@@ -628,6 +628,6 @@ ENV PYTHONUNBUFFERED=1 \
 LABEL org.opencontainers.image.source=https://github.com/YonatanBiton/artac-devops-challenge-v2
 ```
 
-- `PYTHONUNBUFFERED=1` — forces Python to print logs immediately rather than buffering them. Critical for debugging crashes in production containers where buffered logs might never appear.
-- `PYTHONDONTWRITEBYTECODE=1` — stops Python from writing `.pyc` cache files inside the container, which are pointless in an ephemeral environment.
+- `PYTHONUNBUFFERED=1` - forces Python to print logs immediately rather than buffering them. Critical for debugging crashes in production containers where buffered logs might never appear.
+- `PYTHONDONTWRITEBYTECODE=1` - stops Python from writing `.pyc` cache files inside the container, which are pointless in an ephemeral environment.
 - The OCI label links the GHCR package back to the source repository automatically.
