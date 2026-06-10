@@ -1,0 +1,10 @@
+data.aws_ami.ubuntu: Reading...
+aws_security_group.app: Refreshing state... [id=sg-0fe2fae3f43e70443]
+data.aws_ami.ubuntu: Read complete after 1s [id=ami-02013f5b15758f4d4]
+aws_instance.app: Refreshing state... [id=i-04a2c820a7d466305]
+aws_eip.app: Refreshing state... [id=eipalloc-0080eafc67a672b6e]
+
+No changes. Your infrastructure matches the configuration.
+
+Terraform has compared your real infrastructure against your configuration
+and found no differences, so no changes are needed.
