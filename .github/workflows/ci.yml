@@ -84,8 +84,8 @@ jobs:
           image-ref: ${{ env.IMAGE_NAME }}:scan
           format: table
           exit-code: 1
-          ignore-unfixed: true
-          severity: CRITICAL
+          ignore-unfixed: false
+          severity: CRITICAL,HIGH
 
   deploy:
     name: Deploy
