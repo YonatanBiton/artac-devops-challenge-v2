@@ -30,4 +30,5 @@ variable "docker_image" {
 variable "ssh_key_name" {
   description = "Name of the SSH key pair for EC2 access"
   type        = string
+  default     = "sentiment-api-key"
 }
