@@ -486,3 +486,84 @@ This completes a three-tier security posture:
 | 19 | Initiative | Docker Compose for local dev | - |  Added |
 | 20 | Initiative | IMDSv2 enforcement | - |  Added |
 | 21 | Initiative | Medium/Low vulnerability logging | — | Added |
+
+
+## CI/CD Pipeline Design Improvements
+
+After completing the initial assessment and fixes, the following additional pipeline design issues were identified and addressed based on senior-level feedback (From Claude).
+
+---
+
+### Improvement 1 — Concurrency group missing
+
+**What was found:**
+No concurrency configuration existed on the workflow. Two quick pushes to `main` could run simultaneously, deploying out of order — whichever pipeline finished last would win, potentially deploying older code over newer code.
+
+**What was done:**
+Added a `concurrency` block at the workflow level:
+```yaml
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+```
+If a new push arrives while the pipeline is already running, the old run is cancelled automatically. The newest push always wins.
+
+---
+
+### Improvement 2 — Test job unnecessarily blocked on build
+
+**What was found:**
+The `test` job had `needs: [build]`, meaning it waited for the build to complete before running. However the test job never uses the built Docker image — it installs dependencies with `pip` and runs `pytest` directly on the runner. There was no reason for the dependency.
+
+**What was done:**
+Removed `needs: [build]` from the test job. It now runs in parallel with `build`, reducing overall pipeline time for free. The `deploy` job still depends on both `build` and `test`, so the safety gate is fully preserved.
+
+---
+
+### Improvement 3 — Build pushes `:latest` before gates pass
+
+**What was found:**
+The build job pushed both `:latest` and `:sha` tags to GHCR immediately — before tests or security scan had run. A failing build would still overwrite `:latest` in the registry with broken code.
+
+**What was done:**
+Changed the build job to push only the `:sha` tag. The `:latest` tag is no longer pushed by the build job directly, preventing broken images from overwriting the registry. The deploy job now uses the immutable `:sha` tag — fully traceable back to the exact commit that was tested and scanned.
+
+---
+
+### Improvement 4 — Deploy used `:latest` instead of SHA
+
+**What was found:**
+The deploy job pulled `:latest` from GHCR. This is not traceable — you cannot tell which commit is running on the server, and rollback requires guessing. Two fast pushes could also cause the wrong image to be deployed.
+
+**What was done:**
+Changed the deploy script to pull and run `ghcr.io/${{ env.IMAGE_NAME }}:${{ github.sha }}` — the exact immutable image that passed all pipeline gates. Every deployment is now traceable to a specific commit. Rollback becomes "redeploy the previous commit's SHA tag."
+
+---
+
+### Improvement 5 — No post-deploy smoke test
+
+**What was found:**
+The pipeline marked deployment as successful the moment the SSH script finished running. The container could crash immediately after starting and the pipeline would never know — it would show green while the app was down.
+
+**What was done:**
+Added a smoke test step after the deploy step. The pipeline waits 15 seconds for the container to start, then curls `/ready` and `/predict` from the GitHub Actions runner (external to the instance). If either returns a non-200 response, the pipeline fails. This verifies the app is actually serving traffic after every deployment.
+
+---
+
+### Improvement 6 — Security scan rebuilt the image instead of scanning what was pushed
+
+**What was found:**
+The `security-scan` job ran `docker build` to create a fresh image for scanning. This image was not byte-for-byte identical to what was pushed to GHCR — dependencies could resolve differently between builds. The scan was not guaranteed to reflect what actually gets deployed.
+
+**Known limitation:**
+This was identified but not fully implemented due to complexity. The correct production pattern is to pull the pushed `:sha` image by digest and scan that directly — ensuring what you scan is exactly what you ship. This is documented here as a future improvement.
+
+---
+
+### Improvement 7 — GHCR authentication implicit and undocumented
+
+**What was found:**
+Both `user-data.sh` and the deploy script pull from GHCR with no authentication. This works silently because the GHCR package is public — but this decision was never documented. Anyone on the internet can pull the Docker image.
+
+**What was done:**
+Added a comment in `user-data.sh` documenting the trade-off explicitly. The public package is an acceptable decision for this project, but it should be a conscious choice rather than an implicit one. If the package were made private, a `docker login` step would be required — either using an EC2 instance role or a stored secret.
