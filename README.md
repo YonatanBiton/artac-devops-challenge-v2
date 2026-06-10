@@ -166,7 +166,7 @@ After `terraform apply`, Terraform prints:
 terraform destroy
 ```
 
-> ⚠️ Remember to destroy the infrastructure when done to avoid AWS charges. Elastic IPs incur a small charge when not attached to a running instance.
+> Remember to destroy the infrastructure when done to avoid AWS charges. Elastic IPs incur a small charge when not attached to a running instance.
 
 ---
 
