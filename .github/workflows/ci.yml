@@ -103,7 +103,7 @@ jobs:
     steps:
       - name: Lowercase image name
         run: echo "IMAGE_NAME=$(echo ${{ env.IMAGE_NAME }} | tr '[:upper:]' '[:lower:]')" >> $GITHUB_ENV
-        
+
       - name: Deploy to EC2
         uses: appleboy/ssh-action@v1.0.3
         with:
@@ -111,11 +111,11 @@ jobs:
           username: ubuntu
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           script: |
-            docker pull ghcr.io/${{ github.repository }}:latest
+            docker pull ghcr.io/${{ env.IMAGE_NAME }}:latest
             docker stop sentiment-api || true
             docker rm sentiment-api || true
             docker run -d \
               --name sentiment-api \
               --restart unless-stopped \
               -p 8080:8080 \
-              ghcr.io/${{ github.repository }}:latest
+              ghcr.io/${{ env.IMAGE_NAME }}:latest
