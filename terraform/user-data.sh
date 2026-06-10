@@ -26,6 +26,8 @@ apt-get install -y \
 systemctl enable docker
 systemctl start docker
 
+usermod -aG docker ubuntu #grands permissions
+
 echo "=== Pulling and running application ==="
 docker pull ${docker_image}
 docker run -d \
