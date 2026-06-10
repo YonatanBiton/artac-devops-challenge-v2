@@ -15,7 +15,7 @@ output "app_url" {
 
 output "ssh_command" {
   description = "SSH command to connect to the instance"
-  value       = "ssh -i <your-key>.pem ubuntu@${aws_instance.app.public_ip}"
+  value       = "ssh -i sentiment-api-key.pem ubuntu@${aws_instance.app.public_ip}"
 }
 
 output "elastic_ip" {
