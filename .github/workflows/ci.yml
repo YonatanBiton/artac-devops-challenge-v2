@@ -123,6 +123,8 @@ jobs:
           host: ${{ secrets.EC2_HOST }}
           username: ubuntu
           key: ${{ secrets.SSH_PRIVATE_KEY }}
+          # Log rotation: cap each file at 10MB, keep 3 files max (30MB total)
+          # Prevents disk filling up from accumulated container logs over time
           script: |
             docker pull ghcr.io/${{ env.IMAGE_NAME }}:${{ github.sha }}
             docker stop sentiment-api || true
@@ -131,6 +133,8 @@ jobs:
               --name sentiment-api \
               --restart unless-stopped \
               -p 8080:8080 \
+              --log-opt max-size=10m \
+              --log-opt max-file=3 \
               ghcr.io/${{ env.IMAGE_NAME }}:${{ github.sha }}
 
       #running test to verify application is running
