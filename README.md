@@ -115,18 +115,50 @@ The pipeline runs automatically on every push to `main` and on pull requests.
 
 ## Rollback
 
-Because every deployment uses an immutable `:sha` tag, rolling back is straightforward:
+Every deployment uses an immutable commit-SHA tag, so rolling back means redeploying
+the exact image that previously passed all pipeline gates — no revert commit, no
+rebuild, no new pipeline run.
 
-1. Find the last green commit SHA from the [Actions tab](https://github.com/YonatanBiton/artac-devops-challenge-v2/actions)
-2. SSH into the instance: use the `ssh_command` from `terraform output`
+### Method 1 — Re-run the previous deploy (preferred)
+
+1. Open the [Actions tab](https://github.com/YonatanBiton/artac-devops-challenge-v2/actions)
+   and find the last green run on `main`
+2. Open the run and click **Re-run all jobs** (or re-run only the `deploy` job)
+
+The pipeline redeploys that run's SHA-tagged image and the smoke test re-verifies it
+automatically. No SSH required.
+
+### Method 2 — Manual rollback over SSH (if CI is unavailable)
+
+1. Find the last green run in the Actions tab and copy the **full 40-character commit SHA**
+   (the image tag is the full SHA — the short 7-character SHA will not resolve)
+2. SSH into the instance using the `ssh_command` from `terraform output`
 3. Run:
+
 ```bash
+SHA=
+docker pull ghcr.io/yonatanbiton/artac-devops-challenge-v2:$SHA
 docker stop sentiment-api && docker rm sentiment-api
-docker run -d --name sentiment-api --restart unless-stopped -p 8080:8080 \
-  ghcr.io/yonatanbiton/artac-devops-challenge-v2:THE_SHA
+docker run -d \
+  --name sentiment-api \
+  --restart unless-stopped \
+  -p 8080:8080 \
+  --log-opt max-size=10m \
+  --log-opt max-file=3 \
+  ghcr.io/yonatanbiton/artac-devops-challenge-v2:$SHA
 ```
 
-No revert commit needed — the old image is already in GHCR.
+### Verify
+
+A rollback isn't complete until it's verified — the same standard the pipeline applies
+to deployments:
+
+```bash
+curl --fail http://:8080/ready
+curl --fail -X POST http://:8080/predict \
+  -H "Content-Type: application/json" \
+  -d '{"text": "rollback verification"}'
+```
 
 ---
 
