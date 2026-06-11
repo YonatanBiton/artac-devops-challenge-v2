@@ -1,10 +1,42 @@
 data.aws_ami.ubuntu: Reading...
-aws_security_group.app: Refreshing state... [id=sg-0fe2fae3f43e70443]
+aws_eip.app: Refreshing state... [id=eipalloc-0c48aa63c9e64cd04]
+aws_security_group.app: Refreshing state... [id=sg-05d3c6d2ff36aa233]
 data.aws_ami.ubuntu: Read complete after 1s [id=ami-02013f5b15758f4d4]
-aws_instance.app: Refreshing state... [id=i-04a2c820a7d466305]
-aws_eip.app: Refreshing state... [id=eipalloc-0080eafc67a672b6e]
+aws_instance.app: Refreshing state... [id=i-049c254f1d8e52773]
+aws_eip_association.app: Refreshing state... [id=eipassoc-06b8a9f9f4e5ec4ae]
 
-No changes. Your infrastructure matches the configuration.
+Note: Objects have changed outside of Terraform
 
-Terraform has compared your real infrastructure against your configuration
-and found no differences, so no changes are needed.
+Terraform detected the following changes made outside of Terraform since the
+last "terraform apply" which may have affected this plan:
+
+  # aws_instance.app has changed
+  ~ resource "aws_instance" "app" {
+        id                                   = "i-049c254f1d8e52773"
+      ~ public_ip                            = "54.196.150.219" -> "32.197.141.38"
+        tags                                 = {
+            "Name"    = "sentiment-api-server"
+            "Project" = "sentiment-api"
+        }
+        # (39 unchanged attributes hidden)
+
+        # (8 unchanged blocks hidden)
+    }
+
+
+Unless you have made equivalent changes to your configuration, or ignored the
+relevant attributes using ignore_changes, the following plan may include
+actions to undo or respond to these changes.
+
+─────────────────────────────────────────────────────────────────────────────
+
+Changes to Outputs:
+  ~ instance_public_ip = "54.196.150.219" -> "32.197.141.38"
+
+You can apply this plan to save these new output values to the Terraform
+state, without changing any real infrastructure.
+
+─────────────────────────────────────────────────────────────────────────────
+
+Note: You didn't use the -out option to save this plan, so Terraform can't
+guarantee to take exactly these actions if you run "terraform apply" now.
