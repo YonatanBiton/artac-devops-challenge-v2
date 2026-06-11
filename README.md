@@ -258,7 +258,8 @@ terraform destroy
 │   └── terraform.tfvars.example
 ├── Dockerfile              # Production container definition
 ├── docker-compose.yml      # Local development setup
-├── requirements.txt        # Python dependencies
+├── requirements.txt        # Runtime Python dependencies
+├── requirements-dev.txt    # Development and test dependencies
 ├── .dockerignore           # Files excluded from Docker build
 ├── .trivyignore            # Accepted CVE exceptions
 ├── ASSESSMENT.md           # Inherited codebase assessment
