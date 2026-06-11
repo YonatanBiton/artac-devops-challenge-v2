@@ -395,7 +395,7 @@ Not mentioned in DECISIONS.md.
 **What was done:**
 Updated the output to use dynamic values:
 ```hcl
-value = "ssh -i sentiment-api-key.pem.pem ubuntu@${aws_eip.app.public_ip}"
+value = "ssh -i sentiment-api-key.pem ubuntu@${aws_eip.app.public_ip}"
 ```
 
 ---
