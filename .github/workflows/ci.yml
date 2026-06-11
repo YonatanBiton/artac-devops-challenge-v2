@@ -80,7 +80,7 @@ jobs:
 
       - name: Build image for scanning
         run: docker build -t ${{ env.IMAGE_NAME }}:scan .
-        
+
       #CI will fail if Ciritical or High severity vulnerabilities were found
       - name: Run Trivy vulnerability scanner
         uses: aquasecurity/trivy-action@v0.36.0
@@ -107,6 +107,11 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       packages: write
+    # Concurrency handling: if a push arrives mid-deploy, the server could be left with no running container -
+    # after "docker stop" but before "docker run". Queue the new deploy instead of cancelling.
+    concurrency:
+      group: deploy-${{ github.ref }}
+      cancel-in-progress: false
     steps:
     #lower casing the repo name as my username includes high case letters/
       - name: Lowercase image name
