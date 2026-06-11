@@ -136,7 +136,7 @@ automatically. No SSH required.
 3. Run:
 
 ```bash
-SHA=
+SHA=PASTE_FULL_40_CHAR_SH
 docker pull ghcr.io/yonatanbiton/artac-devops-challenge-v2:$SHA
 docker stop sentiment-api && docker rm sentiment-api
 docker run -d \
@@ -154,8 +154,8 @@ A rollback isn't complete until it's verified — the same standard the pipeline
 to deployments:
 
 ```bash
-curl --fail http://:8080/ready
-curl --fail -X POST http://:8080/predict \
+curl --fail http://YOUR_ELASTIC_IP:8080/ready
+curl --fail -X POST http://YOUR_ELASTIC_IP:8080/predict \
   -H "Content-Type: application/json" \
   -d '{"text": "rollback verification"}'
 ```
