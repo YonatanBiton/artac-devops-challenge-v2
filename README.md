@@ -19,10 +19,10 @@ A FastAPI service that serves a pre-trained scikit-learn sentiment classifier. S
 ┌─────────────┐     push to main     ┌─────────────────────────────────────┐
 │  Developer  │ ──────────────────►  │           GitHub Actions            │
 └─────────────┘                      │                                     │
-                                     │  build → test → security-scan       │
-                                     │              │                       │
-                                     │              ▼                       │
-                                     │  deploy (only if all pass)          │
+                                     │  build ──► security-scan ──┐        │
+                                     │  test ──────────────────────┤        │
+                                     │                             ▼        │
+                                     │     deploy (only if all pass)       │
                                      └──────────────┬──────────────────────┘
                                                     │
                                     push image      │  SSH deploy
