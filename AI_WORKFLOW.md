@@ -89,9 +89,9 @@ I caught this by thinking through the full end-to-end deploy flow myself rather 
 
 ## Time Estimate
 
-**Total time spent on the assignment:** ~8 hours
+**Total time spent on the assignment:** ~12 hours
 
-**Estimated time without AI assistance:** ~12-16 hours
+**Estimated time without AI assistance:** ~18-22 hours
 
 The main time savings came from:
 - Diagnosing the scikit-learn bug - without AI, manually reading tracebacks and cross-referencing scikit-learn changelogs would have taken significantly longer
