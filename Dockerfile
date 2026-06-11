@@ -1,6 +1,13 @@
 FROM python:3.12-slim
+
+# PYTHONUNBUFFERED: print logs immediately without buffering
+# PYTHONDONTWRITEBYTECODE: don't write .pyc files to disk
 ENV PYTHONUNBUFFERED=1 \
-    PYTHONDONTWRITEBYTECODE=
+    PYTHONDONTWRITEBYTECODE=1
+
+# Link image back to source repository in GHCR
+LABEL org.opencontainers.image.source=https://github.com/YonatanBiton/artac-devops-challenge-v2
+
 RUN apt-get update && apt-get upgrade -y && rm -rf /var/lib/apt/lists/*
 WORKDIR /app
 
