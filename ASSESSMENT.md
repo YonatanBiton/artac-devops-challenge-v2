@@ -395,7 +395,7 @@ Not mentioned in DECISIONS.md.
 **What was done:**
 Updated the output to use dynamic values:
 ```hcl
-value = "ssh -i sentiment-api-key.pem ubuntu@${aws_eip.app.public_ip}"
+value = ""ssh -i ${var.ssh_key_name}.pem ubuntu@${aws_eip.app.public_ip}""
 ```
 
 ---
@@ -518,6 +518,7 @@ concurrency:
 If a new push arrives while the pipeline is already running, the old run is cancelled automatically. The newest push always wins.
 
 Note: this behaviour was later refined in Improvement 9 - the deploy job has its own separate concurrency group with cancel-in-progress: false to prevent mid-deploy cancellations.
+
 ---
 
 ### Improvement 2 - Test job unnecessarily blocked on build
