@@ -517,6 +517,7 @@ concurrency:
 ```
 If a new push arrives while the pipeline is already running, the old run is cancelled automatically. The newest push always wins.
 
+Note: this behaviour was later refined in Improvement 9 - the deploy job has its own separate concurrency group with cancel-in-progress: false to prevent mid-deploy cancellations.
 ---
 
 ### Improvement 2 - Test job unnecessarily blocked on build
@@ -582,7 +583,7 @@ Added a comment in `user-data.sh` documenting the trade-off explicitly. The publ
 ### Improvement 8 - `:latest` left orphaned after SHA-only tagging
 
 **What was found:**
-Improvement 3 changed the build job to push only the `:sha` tag, which was correct. However this left `:latest` in GHCR pointing at a stale image — or missing entirely. `terraform.tfvars.example` references `:latest` as the deployment image, meaning a fresh `terraform apply` would boot an instance pulling the wrong image.
+Improvement 3 changed the build job to push only the `:sha` tag, which was correct. However this left `:latest` in GHCR pointing at a stale image - or missing entirely. `terraform.tfvars.example` references `:latest` as the deployment image, meaning a fresh `terraform apply` would boot an instance pulling the wrong image.
 
 **What was done:**
 Added a promote step at the end of the deploy job, after the smoke test passes:
@@ -590,14 +591,14 @@ Added a promote step at the end of the deploy job, after the smoke test passes:
 - name: Promote to latest
   run: docker buildx imagetools create -t ghcr.io/${{ env.IMAGE_NAME }}:latest ghcr.io/${{ env.IMAGE_NAME }}:${{ github.sha }}
 ```
-`:latest` is now only updated after the image has passed build, test, security scan, deploy, and a live HTTP smoke test. This makes `:latest` a meaningful reference — it always points to the last known-good deployment.
+`:latest` is now only updated after the image has passed build, test, security scan, deploy, and a live HTTP smoke test. This makes `:latest` a meaningful reference - it always points to the last known-good deployment.
 
 ---
 
 ### Improvement 9 - Deploy job could be cancelled mid-execution
 
 **What was found:**
-The workflow-level concurrency group uses `cancel-in-progress: true`. If a second push arrived while the deploy job was running, GitHub would cancel the entire workflow mid-execution — potentially after `docker stop` but before `docker run`, leaving the EC2 instance with no running container and the server down.
+The workflow-level concurrency group uses `cancel-in-progress: true`. If a second push arrived while the deploy job was running, GitHub would cancel the entire workflow mid-execution - potentially after `docker stop` but before `docker run`, leaving the EC2 instance with no running container and the server down.
 
 **What was done:**
 Added a separate `concurrency` block directly on the deploy job:
@@ -606,7 +607,7 @@ concurrency:
   group: deploy-${{ github.ref }}
   cancel-in-progress: false
 ```
-Build, test, and security-scan can still cancel each other at the workflow level — that is harmless. The deploy job now has its own concurrency lane that never cancels in progress. If a second deploy is triggered while one is running, it waits in queue until the first completes cleanly.
+Build, test, and security-scan can still cancel each other at the workflow level - that is harmless. The deploy job now has its own concurrency lane that never cancels in progress. If a second deploy is triggered while one is running, it waits in queue until the first completes cleanly.
 
 ---
 
