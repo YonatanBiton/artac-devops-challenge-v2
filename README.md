@@ -113,6 +113,23 @@ The pipeline runs automatically on every push to `main` and on pull requests.
 
 ---
 
+## Rollback
+
+Because every deployment uses an immutable `:sha` tag, rolling back is straightforward:
+
+1. Find the last green commit SHA from the [Actions tab](https://github.com/YonatanBiton/artac-devops-challenge-v2/actions)
+2. SSH into the instance: use the `ssh_command` from `terraform output`
+3. Run:
+```bash
+docker stop sentiment-api && docker rm sentiment-api
+docker run -d --name sentiment-api --restart unless-stopped -p 8080:8080 \
+  ghcr.io/yonatanbiton/artac-devops-challenge-v2:THE_SHA
+```
+
+No revert commit needed — the old image is already in GHCR.
+
+---
+
 ## Infrastructure (Terraform)
 
 The infrastructure is defined as code in the `terraform/` directory. It provisions an AWS EC2 instance with a security group and a static Elastic IP.
@@ -167,6 +184,21 @@ terraform destroy
 ```
 
 > Remember to destroy the infrastructure when done to avoid AWS charges. Elastic IPs incur a small charge when not attached to a running instance.
+
+---
+
+## Cost Estimate (us-east-1)
+
+| Resource | Cost |
+|---|---|
+| t3.micro EC2 | Free tier (750 hrs/month, first 12 months), then ~$7.60/month |
+| 20GB gp3 EBS volume | ~$1.60/month |
+| Elastic IP — instance running | Free |
+| Elastic IP — instance stopped | ~$3.60/month |
+| GHCR — public repo | Free |
+| **Total (instance running, post free tier)** | **~$9.20/month** |
+
+> Run `terraform destroy` when not in use. The Elastic IP is the main cost trap — it bills when the instance is stopped but the IP is still allocated.
 
 ---
 
