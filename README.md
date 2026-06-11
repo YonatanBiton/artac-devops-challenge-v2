@@ -116,10 +116,10 @@ The pipeline runs automatically on every push to `main` and on pull requests.
 ## Rollback
 
 Every deployment uses an immutable commit-SHA tag, so rolling back means redeploying
-the exact image that previously passed all pipeline gates — no revert commit, no
+the exact image that previously passed all pipeline gates - no revert commit, no
 rebuild, no new pipeline run.
 
-### Method 1 — Re-run the previous deploy (preferred)
+### Method 1 - Re-run the previous deploy (preferred)
 
 1. Open the [Actions tab](https://github.com/YonatanBiton/artac-devops-challenge-v2/actions)
    and find the last green run on `main`
@@ -128,10 +128,10 @@ rebuild, no new pipeline run.
 The pipeline redeploys that run's SHA-tagged image and the smoke test re-verifies it
 automatically. No SSH required.
 
-### Method 2 — Manual rollback over SSH (if CI is unavailable)
+### Method 2 - Manual rollback over SSH (if CI is unavailable)
 
 1. Find the last green run in the Actions tab and copy the **full 40-character commit SHA**
-   (the image tag is the full SHA — the short 7-character SHA will not resolve)
+   (the image tag is the full SHA - the short 7-character SHA will not resolve)
 2. SSH into the instance using the `ssh_command` from `terraform output`
 3. Run:
 
@@ -150,7 +150,7 @@ docker run -d \
 
 ### Verify
 
-A rollback isn't complete until it's verified — the same standard the pipeline applies
+A rollback isn't complete until it's verified - the same standard the pipeline applies
 to deployments:
 
 ```bash
@@ -225,12 +225,12 @@ terraform destroy
 |---|---|
 | t3.micro EC2 | Free tier (750 hrs/month, first 12 months), then ~$7.60/month |
 | 20GB gp3 EBS volume | ~$1.60/month |
-| Elastic IP — instance running | Free |
-| Elastic IP — instance stopped | ~$3.60/month |
-| GHCR — public repo | Free |
+| Elastic IP - instance running | Free |
+| Elastic IP - instance stopped | ~$3.60/month |
+| GHCR - public repo | Free |
 | **Total (instance running, post free tier)** | **~$9.20/month** |
 
-> Run `terraform destroy` when not in use. The Elastic IP is the main cost trap — it bills when the instance is stopped but the IP is still allocated.
+> Run `terraform destroy` when not in use. The Elastic IP is the main cost trap - it bills when the instance is stopped but the IP is still allocated.
 
 ---
 
