@@ -85,7 +85,7 @@ curl -X POST http://localhost:8080/predict \
 ## Running Tests
 
 ```bash
-pip install -r requirements.txt
+pip install -r requirements-dev.txt
 pytest tests/ -v
 ```
 
