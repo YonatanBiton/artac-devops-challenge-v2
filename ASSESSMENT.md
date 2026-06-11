@@ -302,7 +302,7 @@ DECISIONS.md says: *"Needed for initial setup and for the CI pipeline to deploy 
 **What was done:**
 Port 22 remains open to `0.0.0.0/0` but security is enforced at the authentication layer - key-based authentication is required, and password authentication is disabled on Ubuntu AMIs by default. Without the private key, no connection can be established regardless of IP. The private key is stored as a GitHub Actions secret and distributed to developers securely.
 
-This is the standard production pattern for EC2 SSH access. The ideal long-term solution is AWS Systems Manager Session Manager - which requires zero open ports and controls access via IAM - but that is documented as a future improvement rather than implemented here, as it requires additional Terraform resources (IAM instance profile, SSM endpoints) beyond the assignment scope.
+This is a common and acceptable pattern for single-instance EC2 deployments. The ideal long-term solution is AWS Systems Manager Session Manager - which requires zero open ports and controls access via IAM - but that is documented as a future improvement rather than implemented here, as it requires additional Terraform resources (IAM instance profile, SSM endpoints) beyond the assignment scope.
 
 ---
 
